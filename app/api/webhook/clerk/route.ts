@@ -1,23 +1,22 @@
-import { Webhook } from 'svix'
+import { Webhook, WebhookRequiredHeaders } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { clerkClient } from '@clerk/nextjs'
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { createUser, deleteUser, updateUser } from '@/lib/actions/user.actions'
+import { IncomingHttpHeaders } from 'http'
 
-export const POST = async (req: Request) => {
-    const SECRET = process.env.WS
+const SECRET = process.env.WS
+
+export async function POST(req: Request) {
+    
     if(!SECRET) throw new Error("WS empty...")
-
     const headerPayload = headers();
-    const svix_id=headerPayload.get("svix-id");
-    const svix_timestamp=headerPayload.get("svix-timestamp");
-    const svix_signature=headerPayload.get("svix-signature");
 
-    if(!svix_id || !svix_signature || !svix_timestamp) {
-        return new Response('Error encountered - no svix header', {
-            status: 400
-        })
+    const head = {
+        "svix-id": headerPayload.get("svix-id"),
+        "svix-timestamp": headerPayload.get("svix-timestamp"),
+        "svix-signature": headerPayload.get("svix-signature")
     }
 
     const payload = await req.json()
@@ -28,13 +27,9 @@ export const POST = async (req: Request) => {
     let evt: WebhookEvent
 
     try {
-        evt = wh.verify(body, {
-            "svix-id": svix_id,
-            "svix-timestamp": svix_timestamp,
-            "svix-signature": svix_signature,
-          }) as WebhookEvent
+        evt = wh.verify(body,head as IncomingHttpHeaders & WebhookRequiredHeaders) as WebhookEvent
     } catch (error) {
-        console.log(error)
+        console.error(error as Error)
         return new Response('Error encountered', {
             status: 400
         })
@@ -97,4 +92,13 @@ export const POST = async (req: Request) => {
     }
 
     return new Response('', {status: 200})
+}
+
+export async function GET(){
+    const data = {
+        name: 'Bishal Shrestha',
+        age: '27'
+    }
+
+    return NextResponse.json(data)
 }
