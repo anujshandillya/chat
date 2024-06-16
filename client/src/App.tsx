@@ -3,6 +3,7 @@ import Register from "./components/Shared/Register";
 import Login from "./components/Shared/Login";
 import Home from "./components/Home";
 import { Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
         </Routes>
+        <Toaster />
       </div>
     </>
   );
