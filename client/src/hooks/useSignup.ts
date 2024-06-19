@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuthContext } from "../context/authContext";
 
 interface formFields {
   firstName: string;
@@ -13,6 +14,7 @@ interface formFields {
 
 const useSignup = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const {setAuthUser} = useAuthContext() || {};
 
   const signUp = async ({
     firstName,
@@ -36,7 +38,7 @@ const useSignup = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,6 +58,10 @@ const useSignup = () => {
         throw new Error(data.error);
       }
       // localstorage
+      localStorage.setItem("authUser", JSON.stringify(data));
+      if (setAuthUser) {
+        setAuthUser(data);
+      }
       // context
     } catch (error: any) {
       toast.error(error);
