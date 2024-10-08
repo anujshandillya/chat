@@ -1,5 +1,6 @@
 import Conversation from "../models/convo.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId, io } from "../socketIO/socket.js";
 
 export const sendMessages = async (req, res) => {
     // res.send(`message sent! ${req.params.id}`)
@@ -28,12 +29,18 @@ export const sendMessages = async (req, res) => {
             convo.messages.push(newMessage._id);
         }
 
-        // SOCKET IO CONFIGURATION
-
+        
         // await convo.save(); // save convo
         // await newMessage.save(); // save message
-
+        
         await Promise.all([convo.save(), newMessage.save()]); // save both convo and message
+        
+        // SOCKET IO CONFIGURATION
+        const receiverSocketId = getReceiverSocketId(receiverId);
+
+        if(receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
 
         res.status(201).json({ 
             message: "Message sent successfully",

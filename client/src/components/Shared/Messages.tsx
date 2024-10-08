@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import useGetMessages from "../../hooks/useGetMessages";
 import MessageSkeleton from "../skeleton/MessageSkeleton";
 import Message from "./Message"
+import useListenMessages from "../../hooks/useListenMessages";
 
 const Messages = () => {
   const {loading, messages} = useGetMessages();
+useListenMessages();
   const lastMsgRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setTimeout(() => {
@@ -23,20 +25,6 @@ const Messages = () => {
       {!loading && (messages === undefined || messages.length === 0) && (
         <p className="text-center">No messages yet</p>
       )}
-        {/* <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message />
-        <Message /> */}
     </div>
   )
 }
